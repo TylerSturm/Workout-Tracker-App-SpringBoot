@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tracker App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        input, button { padding: 8px; margin: 5px; }
+        button { background-color: #4CAF50; color: white; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .results { margin-top: 10px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tracker App</h1>
+        
+        <div class="section">
+            <h2>Add Lift</h2>
+            <input type="text" id="liftName" placeholder="Lift Name">
+            <input type="number" id="weight" placeholder="Weight">
+            <input type="number" id="reps" placeholder="Reps">
+            <button onclick="addLift()">Add Lift</button>
+            <div id="liftResults" class="results"></div>
+        </div>
+
+        <div class="section">
+            <h2>Get All Lifts</h2>
+            <button onclick="getAllLifts()">Get Lifts</button>
+            <div id="liftsOutput" class="results"></div>
+        </div>
+
+        <div class="section">
+            <h2>Add User</h2>
+            <input type="text" id="userName" placeholder="Name">
+            <input type="number" id="userWeight" placeholder="Weight" step="0.1">
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="addUser()">Add User</button>
+            <div id="userResults" class="results"></div>
+        </div>
+
+        <div class="section">
+            <h2>Get All Users</h2>
+            <button onclick="getAllUsers()">Get Users</button>
+            <div id="usersOutput" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        async function addLift() {
+            const lift = {
+                name: document.getElementById('liftName').value,
+                weight: parseInt(document.getElementById('weight').value),
+                reps: parseInt(document.getElementById('reps').value)
+            };
+            try {
+                const response = await fetch('/lifts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lift)
+                });
+                const result = await response.json();
+                document.getElementById('liftResults').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('liftResults').innerHTML = `Error: ${error}`;
+            }
+        }
+
+        async function getAllLifts() {
+            try {
+                const response = await fetch('/lifts');
+                const result = await response.json();
+                document.getElementById('liftsOutput').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('liftsOutput').innerHTML = `Error: ${error}`;
+            }
+        }
+
+        async function addUser() {
+            const user = {
+                name: document.getElementById('userName').value,
+                weight: parseFloat(document.getElementById('userWeight').value),
+                userName: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+            try {
+                const response = await fetch('/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(user)
+                });
+                const result = await response.json();
+                document.getElementById('userResults').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('userResults').innerHTML = `Error: ${error}`;
+            }
+        }
+
+        async function getAllUsers() {
+            try {
+                const response = await fetch('/users');
+                const result = await response.json();
+                document.getElementById('usersOutput').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('usersOutput').innerHTML = `Error: ${error}`;
+            }
+        }
+    </script>
+</body>
+</html>

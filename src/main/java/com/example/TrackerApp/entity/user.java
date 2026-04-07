@@ -9,12 +9,17 @@ public class User
 {
     @Id
     @GeneratedValue
+    private Long id;
     private String name;
     private double weight;
     private String userName;
     private String password;
 
-    public user(String name, double weight, String userName, String password)
+    public User()
+    {
+    }
+
+    public User(String name, double weight, String userName, String password)
     {
         this.name = name;
         this.weight = weight;
@@ -22,12 +27,17 @@ public class User
         this.password = password;
     }
 
-    public int getName()
+    public Long getId()
+    {
+        return this.id;
+    }
+
+    public String getName()
     {
         return this.name;
     }
 
-    public int getweight()
+    public double getweight()
     {
         return this.weight;
     }
@@ -37,7 +47,7 @@ public class User
         return this.userName;
     }
 
-    public string getPassword()
+    public String getPassword()
     {
         return this.password;
     }

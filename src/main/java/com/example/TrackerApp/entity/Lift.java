@@ -9,6 +9,7 @@ public class Lift
 {
     @Id
     @GeneratedValue
+    private Long id;
     private int weight;
     private int reps;
     private String name;
@@ -23,6 +24,11 @@ public class Lift
         this.weight = weight;
         this.reps = reps;
         this.name = name;
+    }
+
+    public Long getId()
+    {
+        return this.id;
     }
 
     public int getWeight()
