@@ -1,34 +1,50 @@
 package com.example.TrackerApp.controller;
 
-import java.util.List;
-
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.example.TrackerApp.entity.User;
 import com.example.TrackerApp.repository.UserRepository;
 
-@RestController
+@Controller
 public class UserController
 {
+
     private UserRepository userRepository;
 
-    public UserController(UserRepository userRepository)
+    public UserController(UserRepository userRepository) 
     {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/users")
-    public List<User> getAllUsers()
+    @GetMapping("/signup")
+    public String showSignupForm(Model model) 
     {
-        return userRepository.findAll();
+        model.addAttribute("user", new User());
+        return "signup";
     }
 
-    @PostMapping("/users")
-    public User addUser(@RequestBody User user)
+    @PostMapping("/signup")
+    public String handleSignup(@ModelAttribute User user, Model model) 
     {
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        model.addAttribute("message", "User created successfully!");
+        return "result";
+    }
+
+    @GetMapping("/login")
+    public String showLoginPage(Model model)
+    {
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String handleLogin(@ModelAttribute User user, Model model)
+    {
+        return "loginSuccess";
     }
 }
