@@ -30,8 +30,19 @@ public class UserController
     @PostMapping("/signup")
     public String handleSignup(@ModelAttribute User user, Model model) 
     {
-        userRepository.save(user);
+        if(userRepository.findByEmail(user.getEmail()) != null)
+        {
+            model.addAttribute("message", "Email is already in use.");
+            return "signupError";
+        }
 
+        if(userRepository.findByUsername(user.getUsername()) != null)
+        {
+            model.addAttribute("message", "Username is already taken.");
+            return "signupError";
+        }
+
+        userRepository.save(user);
         model.addAttribute("message", "User created successfully!");
         return "result";
     }
@@ -45,6 +56,15 @@ public class UserController
     @PostMapping("/login")
     public String handleLogin(@ModelAttribute User user, Model model)
     {
+        User existingUser = userRepository.findByEmailAndPassword(
+                    user.getEmail(),
+                    user.getPassword());
+
+        if(existingUser == null)
+        {
+            model.addAttribute("message", "Invalid email or password.");
+            return "loginError";
+        }
         return "loginSuccess";
     }
 }
