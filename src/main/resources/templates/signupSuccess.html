@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login Error</title>
+    <title>Account Created</title>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -27,8 +27,8 @@
         .icon {
             width: 40px;
             height: 40px;
-            background: #fdf3f3;
-            border: 1px solid #f0c8c8;
+            background: #f0faf4;
+            border: 1px solid #c6e8d3;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -73,12 +73,12 @@
 <body>
 
 <div class="card">
-    <div class="icon">!</div>
-    <h1>Sign-in failed</h1>
-    <p class="message" th:text="${message}">Invalid credentials. Please try again.</p>
+    <div class="icon">✓</div>
+    <h1>Account created</h1>
+    <p class="message" th:text="${message}">You're all set. Head to the app to get started.</p>
 
-    <form th:action="@{/login}" method="get">
-        <button type="submit" class="btn">Back to login</button>
+    <form th:action="@{/home}" method="get">
+        <button type="submit" class="btn">Go to home</button>
     </form>
 </div>
 

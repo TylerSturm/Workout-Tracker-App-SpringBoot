@@ -44,7 +44,7 @@ public class UserController
 
         userRepository.save(user);
         model.addAttribute("message", "User created successfully!");
-        return "result";
+        return "signupSuccess";
     }
 
     @GetMapping("/login")
