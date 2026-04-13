@@ -1,6 +1,7 @@
 package com.example.TrackerApp.controller;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,8 @@ import com.example.TrackerApp.repository.UserRepository;
 @Controller
 public class UserController
 {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserController(UserRepository userRepository)
     {
@@ -42,7 +44,10 @@ public class UserController
             return "signupError";
         }
 
+        // Hash the plain text password before saving — the raw password is never stored
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+
         model.addAttribute("message", "User created successfully!");
         return "signupSuccess";
     }
@@ -56,18 +61,16 @@ public class UserController
     @PostMapping("/login")
     public String handleLogin(@ModelAttribute User user, HttpSession session, Model model)
     {
-        User existingUser = userRepository.findByEmailAndPassword(
-                user.getEmail(),
-                user.getPassword());
+        // Look up by email only — we can't query by password anymore since it's hashed
+        User existingUser = userRepository.findByEmail(user.getEmail());
 
-        if (existingUser == null)
+        if (existingUser == null || !passwordEncoder.matches(user.getPassword(), existingUser.getPassword()))
         {
             model.addAttribute("message", "Invalid email or password.");
             return "loginError";
         }
 
-        // Store the user's ID and name in the session for use across the app
-        session.setAttribute("userId", existingUser.getId());
+        session.setAttribute("userId",   existingUser.getId());
         session.setAttribute("userName", existingUser.getName());
 
         return "redirect:/home";

@@ -1,12 +1,15 @@
 package com.example.TrackerApp.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.example.TrackerApp.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface UserRepository extends JpaRepository<User, String>
+@Repository
+public interface UserRepository extends JpaRepository<User, Long>
 {
-    User findByUsername(String username);
     User findByEmail(String email);
-    User findByEmailAndPassword(String username, String password);
+    User findByUsername(String username);
+
+    // findByEmailAndPassword has been removed — passwords are hashed so they
+    // can never be queried directly. Use findByEmail then BCrypt.matches() instead.
 }
