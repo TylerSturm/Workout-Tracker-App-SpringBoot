@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+            background-color: #f5f4f0;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        /* ── NAV ── */
+        nav {
+            background: #fff;
+            border-bottom: 1px solid #e0dfd9;
+            padding: 0 32px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            color: #888;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: #1a1a1a; }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 36px 24px;
+        }
+
+        .page-header { margin-bottom: 28px; }
+
+        .page-header h1 {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+
+        .page-header p {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: #ffffff;
+            border-radius: 4px;
+            border: 1px solid #e0dfd9;
+            padding: 28px;
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* ── FORM ── */
+        .field { margin-bottom: 14px; }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d8d7d2;
+            border-radius: 3px;
+            background: #fafaf8;
+            color: #1a1a1a;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+            appearance: none;
+        }
+
+        input::placeholder { color: #aaa; }
+
+        input:focus, select:focus {
+            border-color: #1a1a1a;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(26,26,26,0.07);
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 11px;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn:hover { background: #333; }
+        .btn:active { background: #000; }
+
+        /* ── FLASH MESSAGES ── */
+        .flash {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .flash-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+        .flash-pr      { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+        .flash-error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+        .flash-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .flash-success .flash-dot { background: #22c55e; }
+        .flash-pr     .flash-dot  { background: #f59e0b; }
+        .flash-error  .flash-dot  { background: #ef4444; }
+
+        /* ── STATS ── */
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: #fafaf8;
+            border: 1px solid #e0dfd9;
+            border-radius: 3px;
+            padding: 14px 16px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── CSS BAR CHART ── */
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .chart-title { font-size: 13px; font-weight: 500; }
+
+        .chart-filter { display: flex; gap: 4px; }
+
+        .filter-link {
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid #d8d7d2;
+            border-radius: 2px;
+            color: #888;
+            text-decoration: none;
+        }
+
+        .filter-link:hover, .filter-link.active {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+
+        /* Bars are CSS-only: backend passes heightPercent (0–100) inline */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            height: 130px;
+            border-bottom: 1px solid #e0dfd9;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            position: relative;
+        }
+
+        .bar {
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -18px;
+            font-size: 9px;
+            color: #aaa;
+            white-space: nowrap;
+        }
+
+        .bar-chart-empty {
+            text-align: center;
+            font-size: 13px;
+            color: #ccc;
+            padding: 36px 0;
+            border-bottom: 1px solid #e0dfd9;
+            margin-bottom: 20px;
+        }
+
+        /* ── TABLE ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+        thead th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #aaa;
+            padding: 0 0 8px;
+            border-bottom: 1px solid #e0dfd9;
+        }
+
+        tbody tr { border-bottom: 1px solid #f0efe9; }
+        tbody tr:last-child { border-bottom: none; }
+
+        td { padding: 10px 0; }
+        td:last-child { text-align: right; }
+
+        .lift-name { font-weight: 500; }
+        .muted { color: #888; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #f0efe9;
+            color: #555;
+        }
+
+        .badge-pr { background: #fef9c3; color: #854d0e; }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 0;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .empty-state strong {
+            display: block;
+            font-size: 15px;
+            color: #ccc;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 760px) {
+            .grid { grid-template-columns: 1fr; }
+            .stat-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <span class="brand">TrackerApp</span>
+    <ul class="nav-links">
+        <li><a th:href="@{/dashboard}" class="active">Dashboard</a></li>
+        <li><a th:href="@{/history}">History</a></li>
+        <li><a th:href="@{/programs}">Programs</a></li>
+        <li><a th:href="@{/profile}">Profile</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+
+    <div class="page-header">
+        <h1>Today's Session</h1>
+        <!--
+            Model attribute: todayDate (String)
+            e.g. model.addAttribute("todayDate", "Sunday, April 13 2025");
+        -->
+        <p th:text="${todayDate}">Sunday, April 13 2025</p>
+    </div>
+
+    <div class="grid">
+
+        <!-- ══════════════════════════════
+             LEFT PANEL — Log a Lift
+             
+             Controller setup:
+               GET  /dashboard  → model.addAttribute("liftForm", new LiftForm())
+               POST /lifts      → saves entry, checks for PR, sets flash attrs,
+                                   redirects to /dashboard (PRG pattern)
+
+             LiftForm fields: liftName, weight, reps, sets, notes
+
+             Flash attributes (set via RedirectAttributes):
+               successMsg  — shown on successful log
+               prMsg       — shown when a PR is detected
+               errorMsg    — shown on validation failure
+        ══════════════════════════════ -->
+        <div class="card">
+            <p class="card-title">Log a Lift</p>
+
+            <form th:action="@{/lifts}" th:object="${liftForm}" method="post">
+
+                <div class="field">
+                    <label for="liftName">Exercise</label>
+                    <input list="lift-suggestions"
+                           type="text"
+                           id="liftName"
+                           th:field="*{liftName}"
+                           placeholder="e.g. Bench Press"
+                           autocomplete="off"
+                           required />
+                    <datalist id="lift-suggestions">
+                        <option value="Bench Press">
+                        <option value="Squat">
+                        <option value="Deadlift">
+                        <option value="Overhead Press">
+                        <option value="Barbell Row">
+                        <option value="Pull-up">
+                        <option value="Dumbbell Curl">
+                        <option value="Leg Press">
+                        <option value="Incline Press">
+                        <option value="Romanian Deadlift">
+                    </datalist>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="weight">Weight (lbs)</label>
+                        <input type="number"
+                               id="weight"
+                               th:field="*{weight}"
+                               placeholder="135"
+                               min="0"
+                               step="2.5"
+                               required />
+                    </div>
+                    <div class="field">
+                        <label for="reps">Reps</label>
+                        <input type="number"
+                               id="reps"
+                               th:field="*{reps}"
+                               placeholder="5"
+                               min="1"
+                               step="1"
+                               required />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="sets">Sets</label>
+                    <input type="number"
+                           id="sets"
+                           th:field="*{sets}"
+                           placeholder="3"
+                           min="1"
+                           step="1" />
+                </div>
+
+                <div class="field">
+                    <label for="notes">Notes <span style="color:#aaa; font-weight:400">(optional)</span></label>
+                    <input type="text"
+                           id="notes"
+                           th:field="*{notes}"
+                           placeholder="e.g. Felt strong, paused reps" />
+                </div>
+
+                <button type="submit" class="btn">Log Set</button>
+            </form>
+
+            <div class="flash flash-success" th:if="${successMsg}">
+                <span class="flash-dot"></span>
+                <span th:text="${successMsg}">Set logged!</span>
+            </div>
+
+            <div class="flash flash-pr" th:if="${prMsg}">
+                <span class="flash-dot"></span>
+                <span th:text="${prMsg}">New PR on Bench Press — 225 lbs!</span>
+            </div>
+
+            <div class="flash flash-error" th:if="${errorMsg}">
+                <span class="flash-dot"></span>
+                <span th:text="${errorMsg}">Please fill in all required fields.</span>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+             RIGHT PANEL — Analytics
+
+             Model attributes:
+               todaySets     (int)
+               todayVolume   (String, pre-formatted: "4.2k" or "840")
+               todayPRs      (int)
+               chartRange    (String: "7" | "30" | "all")  ← from ?range= query param
+               chartBars     (List<ChartBar>)
+                               ChartBar: { String dateLabel, int heightPercent (0–100) }
+               recentEntries (List<LiftEntry>)
+                               LiftEntry: { String liftName, double weight,
+                                            int reps, int sets,
+                                            String dateLabel, boolean isPR }
+        ══════════════════════════════ -->
+        <div class="card">
+            <p class="card-title">Analytics</p>
+
+            <!-- Stat pills -->
+            <div class="stat-row">
+                <div class="stat">
+                    <div class="stat-value" th:text="${todaySets}">0</div>
+                    <div class="stat-label">Sets Today</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" th:text="${todayVolume}">0</div>
+                    <div class="stat-label">Volume (lbs)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" th:text="${todayPRs}">0</div>
+                    <div class="stat-label">PRs Hit</div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-header">
+                <span class="chart-title">Daily Volume</span>
+                <div class="chart-filter">
+                    <a th:href="@{/dashboard(range='7')}"
+                       th:classappend="${chartRange == '7'} ? ' active'"
+                       class="filter-link">7d</a>
+                    <a th:href="@{/dashboard(range='30')}"
+                       th:classappend="${chartRange == '30'} ? ' active'"
+                       class="filter-link">30d</a>
+                    <a th:href="@{/dashboard(range='all')}"
+                       th:classappend="${chartRange == 'all'} ? ' active'"
+                       class="filter-link">All</a>
+                </div>
+            </div>
+
+            <!--
+                Backend computes heightPercent per day as:
+                  Math.round((dayVolume / maxVolume) * 100)
+                Pass at least 1 bar for the chart to render.
+            -->
+            <div class="bar-chart" th:if="${not #lists.isEmpty(chartBars)}">
+                <div class="bar-col" th:each="bar : ${chartBars}">
+                    <div class="bar" th:style="'height:' + ${bar.heightPercent} + '%'"></div>
+                    <span class="bar-label" th:text="${bar.dateLabel}">Apr 6</span>
+                </div>
+            </div>
+
+            <div class="bar-chart-empty" th:if="${#lists.isEmpty(chartBars)}">
+                No data for this range
+            </div>
+
+            <!-- Recent entries -->
+            <p class="section-label">Recent Entries</p>
+
+            <table th:if="${not #lists.isEmpty(recentEntries)}">
+                <thead>
+                    <tr>
+                        <th>Exercise</th>
+                        <th>Weight</th>
+                        <th>Reps</th>
+                        <th>Sets</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="entry : ${recentEntries}">
+                        <td class="lift-name"  th:text="${entry.liftName}">Bench Press</td>
+                        <td                    th:text="${entry.weight} + ' lbs'">135 lbs</td>
+                        <td                    th:text="${entry.reps}">5</td>
+                        <td                    th:text="${entry.sets}">3</td>
+                        <td class="muted"      th:text="${entry.dateLabel}">Apr 6</td>
+                        <td>
+                            <span class="badge badge-pr" th:if="${entry.isPR}">PR</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(recentEntries)}">
+                <strong>No entries yet</strong>
+                Log your first set to get started
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -26,7 +26,7 @@ public class LiftRestController
         return liftRepository.findAll();
     }
 
-    @PostMapping("/lifts")
+    @PostMapping("/api/lifts") 
     public Lift addLift(@RequestBody Lift lift)
     {
         return liftRepository.save(lift);
