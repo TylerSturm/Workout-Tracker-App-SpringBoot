@@ -107,7 +107,8 @@ public class DashboardController
         int sets = form.getSets();
         for (int i = 0; i < sets; i++)
         {
-            Lift lift = new Lift(form.getWeight(), form.getReps(), form.getLiftName());
+            LocalDate today = LocalDate.now();
+            Lift lift = new Lift(form.getWeight(), form.getReps(), form.getLiftName(), today);
             lift.setUserId(userId);
             liftRepository.save(lift);
         }
