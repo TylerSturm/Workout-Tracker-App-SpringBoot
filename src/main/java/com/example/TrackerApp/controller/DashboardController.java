@@ -29,11 +29,9 @@ public class DashboardController
         this.liftRepository = liftRepository;
     }
 
-    // ════════════════════════════════════════════════
-    //  GET /home  —  render the dashboard
-    // ════════════════════════════════════════════════
     @GetMapping("/home")
     public String dashboard(
+            // Define user session
             @RequestParam(name = "range", defaultValue = "7") String range,
             HttpSession session,
             Model model)
@@ -43,84 +41,69 @@ public class DashboardController
         if (userId == null)
             return "redirect:/login";
 
+        // Get all lifts from current user
         List<Lift> allLifts = liftRepository.findByUserIdOrderByIdDesc(userId);
 
-        // ── Today's stats ────────────────────────────
+        // Get current date and assign to lift
         LocalDate today = LocalDate.now();
         List<Lift> todayLifts = allLifts.stream()
                 .filter(l -> toLocalDate(l.getId()).equals(today))
                 .collect(Collectors.toList());
 
-        int    todaySets   = todayLifts.size();
-        long   rawVolume   = todayLifts.stream()
-                                .mapToLong(l -> (long) l.getWeight() * l.getReps())
-                                .sum();
+        int todaySets = todayLifts.size();
+
+        // Calculate volume for current session
+        long rawVolume = todayLifts.stream().mapToLong(l -> (long) l.getWeight() * l.getReps()).sum();
         String todayVolume = rawVolume >= 1000
                 ? String.format("%.1fk", rawVolume / 1000.0)
                 : String.valueOf(rawVolume);
-        int todayPRs = countTodayPRs(allLifts, today);
 
-        // ── Chart bars ───────────────────────────────
+        // Compile all lifts as chart entries
         List<ChartBar> chartBars = buildChartBars(allLifts, range);
 
-        // ── Recent entries table (latest 8) ──────────
-        Map<String, Integer> prMap = buildPRMap(allLifts);
         DateTimeFormatter tableFmt = DateTimeFormatter.ofPattern("MMM d");
 
-        List<LiftEntry> recentEntries = allLifts.stream()
-                .limit(8)
-                .map(l -> {
+        // 
+        List<LiftEntry> recentEntries = allLifts.stream().limit(8).map(l -> {
                     String  dateLabel = toLocalDate(l.getId()).format(tableFmt);
-                    boolean isPR      = prMap.getOrDefault(l.getName(), 0) == l.getWeight()
-                                        && isFirstOccurrenceOfPR(allLifts, l);
                     return new LiftEntry(
                             l.getName(), l.getWeight(), l.getReps(),
-                            1, dateLabel, isPR);
+                            1, dateLabel);
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());  
 
-        // ── Model ─────────────────────────────────────
-        model.addAttribute("liftForm",      new LiftForm());
-        model.addAttribute("userName",      session.getAttribute("userName"));
-        model.addAttribute("todayDate",     today.format(
-                DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy")));
-        model.addAttribute("todaySets",     todaySets);
-        model.addAttribute("todayVolume",   todayVolume);
-        model.addAttribute("todayPRs",      todayPRs);
-        model.addAttribute("chartRange",    range);
-        model.addAttribute("chartBars",     chartBars);
+        // Add all created components to dashboard model
+        model.addAttribute("liftForm", new LiftForm());
+        model.addAttribute("userName", session.getAttribute("userName"));
+        model.addAttribute("todayDate", today.format(DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy")));
+        model.addAttribute("todaySets", todaySets);
+        model.addAttribute("todayVolume", todayVolume);
+        model.addAttribute("chartRange", range);
+        model.addAttribute("chartBars", chartBars);
         model.addAttribute("recentEntries", recentEntries);
 
+        // Direct user to home page with created model
         return "home";
     }
 
-    // ════════════════════════════════════════════════
-    //  POST /lifts  —  save a lift, redirect back
-    // ════════════════════════════════════════════════
     @PostMapping("/lifts")
-    public String logLift(
-            @ModelAttribute LiftForm form,
-            HttpSession session,
-            RedirectAttributes ra)
+    public String logLift(@ModelAttribute LiftForm form, HttpSession session, RedirectAttributes ra)
     {
         // Redirect to login if no session exists
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null)
-            return "redirect:/login";
-
-        if (form.getLiftName() == null || form.getLiftName().isBlank()
-                || form.getWeight() <= 0 || form.getReps() <= 0)
         {
+            return "redirect:/login";
+        }
+
+        if (form.getLiftName() == null || form.getLiftName().isBlank() || form.getWeight() <= 0 || form.getReps() <= 0)
+        {
+            // redirect user to home page with error message if any sections are left blank
             ra.addFlashAttribute("errorMsg", "Please fill in exercise, weight, and reps.");
             return "redirect:/home";
         }
 
-        // Check for PR before saving
-        List<Lift> existing = liftRepository.findByUserIdOrderByIdDesc(userId);
-        Map<String, Integer> prMap = buildPRMap(existing);
-        boolean isPR = form.getWeight() > prMap.getOrDefault(form.getLiftName(), 0);
-
-        // Save — each set is stored as an individual Lift row
+        // Save each set as an individual Lift row
         int sets = form.getSets();
         for (int i = 0; i < sets; i++)
         {
@@ -129,48 +112,12 @@ public class DashboardController
             liftRepository.save(lift);
         }
 
-        if (isPR)
-            ra.addFlashAttribute("prMsg",
-                    "New PR on " + form.getLiftName() + " — " + form.getWeight() + " lbs!");
-        else
-            ra.addFlashAttribute("successMsg",
-                    form.getLiftName() + " " + form.getWeight() + " lbs × " + form.getReps() + " logged!");
+        ra.addFlashAttribute("successMsg", form.getLiftName() + " " + form.getWeight() + " lbs × " + form.getReps() + " logged!");
 
         return "redirect:/home";
     }
 
-    // ════════════════════════════════════════════════
-    //  Helpers
-    // ════════════════════════════════════════════════
-
-    private Map<String, Integer> buildPRMap(List<Lift> lifts)
-    {
-        Map<String, Integer> prs = new HashMap<>();
-        for (Lift l : lifts)
-            prs.merge(l.getName(), l.getWeight(), Math::max);
-        return prs;
-    }
-
-    private int countTodayPRs(List<Lift> allLifts, LocalDate today)
-    {
-        Map<String, Integer> prMap = buildPRMap(allLifts);
-        return (int) allLifts.stream()
-                .filter(l -> toLocalDate(l.getId()).equals(today))
-                .filter(l -> l.getWeight() >= prMap.getOrDefault(l.getName(), 0))
-                .map(Lift::getName)
-                .distinct()
-                .count();
-    }
-
-    private boolean isFirstOccurrenceOfPR(List<Lift> allLifts, Lift target)
-    {
-        return allLifts.stream()
-                .filter(l -> l.getName().equals(target.getName())
-                          && l.getWeight() == target.getWeight())
-                .findFirst()
-                .map(l -> l.getId().equals(target.getId()))
-                .orElse(false);
-    }
+    // Helper functions
 
     private List<ChartBar> buildChartBars(List<Lift> allLifts, String range)
     {

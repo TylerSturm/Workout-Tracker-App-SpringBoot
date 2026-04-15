@@ -14,6 +14,7 @@ import com.example.TrackerApp.repository.UserRepository;
 @Controller
 public class UserController
 {
+    // Define repository and password hashing method
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -44,7 +45,7 @@ public class UserController
             return "signupError";
         }
 
-        // Hash the plain text password before saving — the raw password is never stored
+        // Hash the plain text password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
@@ -61,7 +62,7 @@ public class UserController
     @PostMapping("/login")
     public String handleLogin(@ModelAttribute User user, HttpSession session, Model model)
     {
-        // Look up by email only — we can't query by password anymore since it's hashed
+        // Look up by email only 
         User existingUser = userRepository.findByEmail(user.getEmail());
 
         if (existingUser == null || !passwordEncoder.matches(user.getPassword(), existingUser.getPassword()))

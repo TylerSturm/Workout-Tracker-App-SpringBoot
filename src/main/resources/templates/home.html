@@ -162,12 +162,10 @@
         }
 
         .flash-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-        .flash-pr      { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
         .flash-error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
 
         .flash-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
         .flash-success .flash-dot { background: #22c55e; }
-        .flash-pr     .flash-dot  { background: #f59e0b; }
         .flash-error  .flash-dot  { background: #ef4444; }
 
         /* ── STATS ── */
@@ -316,8 +314,6 @@
             color: #555;
         }
 
-        .badge-pr { background: #fef9c3; color: #854d0e; }
-
         .empty-state {
             text-align: center;
             padding: 32px 0;
@@ -456,11 +452,6 @@
                 <span th:text="${successMsg}">Set logged!</span>
             </div>
 
-            <div class="flash flash-pr" th:if="${prMsg}">
-                <span class="flash-dot"></span>
-                <span th:text="${prMsg}">New PR on Bench Press — 225 lbs!</span>
-            </div>
-
             <div class="flash flash-error" th:if="${errorMsg}">
                 <span class="flash-dot"></span>
                 <span th:text="${errorMsg}">Please fill in all required fields.</span>
@@ -494,10 +485,6 @@
                 <div class="stat">
                     <div class="stat-value" th:text="${todayVolume}">0</div>
                     <div class="stat-label">Volume (lbs)</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" th:text="${todayPRs}">0</div>
-                    <div class="stat-label">PRs Hit</div>
                 </div>
             </div>
 
@@ -544,7 +531,6 @@
                         <th>Reps</th>
                         <th>Sets</th>
                         <th>Date</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -554,9 +540,6 @@
                         <td                    th:text="${entry.reps}">5</td>
                         <td                    th:text="${entry.sets}">3</td>
                         <td class="muted"      th:text="${entry.dateLabel}">Apr 6</td>
-                        <td>
-                            <span class="badge badge-pr" th:if="${entry.isPR}">PR</span>
-                        </td>
                     </tr>
                 </tbody>
             </table>

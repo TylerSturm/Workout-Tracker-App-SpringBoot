@@ -12,6 +12,7 @@ public class HomeController
     @GetMapping("/")
     public String Home()
     {
+        // direct user to the signup page when loading base directory
         return "redirect:/signup";
     }
 }

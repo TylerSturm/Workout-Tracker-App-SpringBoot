@@ -11,6 +11,6 @@ public class ChartBar
         this.heightPercent = heightPercent;
     }
 
-    public String getDateLabel()     { return dateLabel; }
-    public int    getHeightPercent() { return heightPercent; }
+    public String getDateLabel() { return dateLabel; }
+    public int getHeightPercent() { return heightPercent; }
 }
