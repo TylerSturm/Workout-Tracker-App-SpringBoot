@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+            background-color: #f5f4f0;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        /* ── NAV ── */
+        nav {
+            background: #fff;
+            border-bottom: 1px solid #e0dfd9;
+            padding: 0 32px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            color: #888;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: #1a1a1a; }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 36px 24px;
+        }
+
+        .page-header { margin-bottom: 28px; }
+
+        .page-header h1 {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+
+        .page-header p {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: #ffffff;
+            border-radius: 4px;
+            border: 1px solid #e0dfd9;
+            padding: 28px;
+        }
+
+        .card + .card { margin-top: 20px; }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* ── AVATAR ── */
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #f0efe9;
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 500;
+            color: #fff;
+            letter-spacing: -1px;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+        }
+
+        .avatar-name {
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
+        .avatar-sub {
+            font-size: 12px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        /* ── INFO LIST ── */
+        .info-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .info-key {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #aaa;
+        }
+
+        .info-val { color: #1a1a1a; font-weight: 500; }
+
+        /* ── FORM ── */
+        .field { margin-bottom: 14px; }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d8d7d2;
+            border-radius: 3px;
+            background: #fafaf8;
+            color: #1a1a1a;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+            appearance: none;
+        }
+
+        input::placeholder { color: #aaa; }
+
+        input:focus, select:focus {
+            border-color: #1a1a1a;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(26,26,26,0.07);
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 11px;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn:hover { background: #333; }
+        .btn:active { background: #000; }
+
+        .btn-ghost {
+            background: transparent;
+            color: #888;
+            border: 1px solid #d8d7d2;
+            margin-top: 8px;
+        }
+
+        .btn-ghost:hover { background: #f5f4f0; color: #1a1a1a; border-color: #1a1a1a; }
+
+        /* ── FLASH MESSAGES ── */
+        .flash {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .flash-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+        .flash-error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+        .flash-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .flash-success .flash-dot { background: #22c55e; }
+        .flash-error  .flash-dot  { background: #ef4444; }
+
+        /* ── STATS ── */
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 0;
+        }
+
+        .stat {
+            background: #fafaf8;
+            border: 1px solid #e0dfd9;
+            border-radius: 3px;
+            padding: 14px 16px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── DANGER ZONE ── */
+        .danger-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+
+        .danger-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0efe9;
+        }
+
+        .danger-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .danger-info p:first-child {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .danger-info p:last-child {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .btn-danger {
+            padding: 8px 16px;
+            background: transparent;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            margin-left: 16px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn-danger:hover { background: #fef2f2; border-color: #b91c1c; }
+
+        @media (max-width: 760px) {
+            .grid { grid-template-columns: 1fr; }
+            .stat-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <span class="brand">TrackerApp</span>
+    <ul class="nav-links">
+        <li><a th:href="@{/dashboard}">Dashboard</a></li>
+        <li><a th:href="@{/history}">History</a></li>
+        <li><a th:href="@{/programs}">Programs</a></li>
+        <li><a th:href="@{/profile}" class="active">Profile</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+
+    <div class="page-header">
+        <h1>Profile</h1>
+        <!--
+            Model attribute: memberSince (String)
+            e.g. model.addAttribute("memberSince", "Member since January 2025");
+        -->
+        <p th:text="${memberSince}">Member since January 2025</p>
+    </div>
+
+    <div class="grid">
+
+        <!-- ══════════════════════════════
+             LEFT PANEL — Identity + Stats
+
+             Model attributes:
+               initials      (String) e.g. "JS"
+               fullName      (String) e.g. "John Smith"
+               username      (String) e.g. "@johnsmith"
+               userEmail     (String)
+               userGoal      (String) e.g. "Strength"
+               totalSets     (int)
+               totalWorkouts (int)
+               totalPRs      (int)
+        ══════════════════════════════ -->
+        <div>
+            <div class="card">
+                <div class="avatar-section">
+                    <div class="avatar" th:text="${initials}">JS</div>
+                    <div class="avatar-name" th:text="${fullName}">John Smith</div>
+                    <div class="avatar-sub" th:text="${username}">@johnsmith</div>
+                </div>
+
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-key">Email</span>
+                        <span class="info-val" th:text="${userEmail}">john@example.com</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Goal</span>
+                        <span class="info-val" th:text="${userGoal}">Strength</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Member Since</span>
+                        <span class="info-val" th:text="${memberSince}">Jan 2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lifetime stats -->
+            <div class="card">
+                <p class="card-title">Lifetime Stats</p>
+                <div class="stat-row">
+                    <div class="stat">
+                        <div class="stat-value" th:text="${totalWorkouts}">0</div>
+                        <div class="stat-label">Workouts</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" th:text="${totalSets}">0</div>
+                        <div class="stat-label">Sets</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" th:text="${totalPRs}">0</div>
+                        <div class="stat-label">PRs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+             RIGHT PANEL — Edit Profile + Password + Danger Zone
+
+             Controller setup:
+               GET  /profile       → model.addAttribute("profileForm", new ProfileForm())
+               POST /profile       → saves updates, sets flash attrs, redirects to /profile
+               POST /profile/password → updates password, sets flash attrs, redirects to /profile
+
+             ProfileForm fields: firstName, lastName, email, goal, bodyweightLbs, heightIn
+
+             Flash attributes (set via RedirectAttributes):
+               successMsg  — shown on successful save
+               errorMsg    — shown on validation failure
+               pwSuccessMsg — shown on successful password change
+               pwErrorMsg   — shown on password mismatch / failure
+        ══════════════════════════════ -->
+        <div>
+            <!-- Edit profile -->
+            <div class="card">
+                <p class="card-title">Edit Profile</p>
+
+                <form th:action="@{/profile}" th:object="${profileForm}" method="post">
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="firstName">First Name</label>
+                            <input type="text"
+                                   id="firstName"
+                                   th:field="*{firstName}"
+                                   placeholder="John"
+                                   required />
+                        </div>
+                        <div class="field">
+                            <label for="lastName">Last Name</label>
+                            <input type="text"
+                                   id="lastName"
+                                   th:field="*{lastName}"
+                                   placeholder="Smith"
+                                   required />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input type="email"
+                               id="email"
+                               th:field="*{email}"
+                               placeholder="john@example.com"
+                               required />
+                    </div>
+
+                    <div class="field">
+                        <label for="goal">Training Goal</label>
+                        <select id="goal" th:field="*{goal}">
+                            <option value="">Select a goal…</option>
+                            <option value="Strength">Strength</option>
+                            <option value="Hypertrophy">Hypertrophy</option>
+                            <option value="Endurance">Endurance</option>
+                            <option value="Weight Loss">Weight Loss</option>
+                            <option value="General Fitness">General Fitness</option>
+                        </select>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="bodyweightLbs">Bodyweight (lbs)</label>
+                            <input type="number"
+                                   id="bodyweightLbs"
+                                   th:field="*{bodyweightLbs}"
+                                   placeholder="175"
+                                   min="50"
+                                   step="0.5" />
+                        </div>
+                        <div class="field">
+                            <label for="heightIn">Height (in)</label>
+                            <input type="number"
+                                   id="heightIn"
+                                   th:field="*{heightIn}"
+                                   placeholder="70"
+                                   min="48"
+                                   step="1" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Save Changes</button>
+                </form>
+
+                <div class="flash flash-success" th:if="${successMsg}">
+                    <span class="flash-dot"></span>
+                    <span th:text="${successMsg}">Profile updated.</span>
+                </div>
+                <div class="flash flash-error" th:if="${errorMsg}">
+                    <span class="flash-dot"></span>
+                    <span th:text="${errorMsg}">Please check your inputs.</span>
+                </div>
+            </div>
+
+            <!-- Change password -->
+            <div class="card">
+                <p class="card-title">Change Password</p>
+
+                <form th:action="@{/profile/password}" method="post">
+
+                    <div class="field">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password"
+                               id="currentPassword"
+                               name="currentPassword"
+                               placeholder="••••••••"
+                               required />
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="newPassword">New Password</label>
+                            <input type="password"
+                                   id="newPassword"
+                                   name="newPassword"
+                                   placeholder="••••••••"
+                                   required />
+                        </div>
+                        <div class="field">
+                            <label for="confirmPassword">Confirm New</label>
+                            <input type="password"
+                                   id="confirmPassword"
+                                   name="confirmPassword"
+                                   placeholder="••••••••"
+                                   required />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Update Password</button>
+                </form>
+
+                <div class="flash flash-success" th:if="${pwSuccessMsg}">
+                    <span class="flash-dot"></span>
+                    <span th:text="${pwSuccessMsg}">Password updated.</span>
+                </div>
+                <div class="flash flash-error" th:if="${pwErrorMsg}">
+                    <span class="flash-dot"></span>
+                    <span th:text="${pwErrorMsg}">Passwords do not match.</span>
+                </div>
+            </div>
+
+            <!-- Danger zone -->
+            <div class="card">
+                <p class="danger-title">Danger Zone</p>
+
+                <div class="danger-row">
+                    <div class="danger-info">
+                        <p>Export Data</p>
+                        <p>Download all your workout history as a CSV file.</p>
+                    </div>
+                    <form th:action="@{/profile/export}" method="post">
+                        <button type="submit" class="btn-danger">Export</button>
+                    </form>
+                </div>
+
+                <div class="danger-row">
+                    <div class="danger-info">
+                        <p>Delete Account</p>
+                        <p>Permanently remove your account and all data.</p>
+                    </div>
+                    <form th:action="@{/profile/delete}" method="post"
+                          onsubmit="return confirm('Are you sure? This cannot be undone.');">
+                        <button type="submit" class="btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
